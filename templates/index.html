@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reinforce Tic-Tac-Toe AI Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <h1>REINFORCE Tic-Tac-Toe</h1>
+                    <p class="subtitle">Deep Reinforcement Learning & Policy Gradient Lab</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-network">NumPy Net (9-256-9)</span>
+                <span class="badge badge-opt">Adam Optimizer</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="tab-baseline">
+                <span class="tab-icon">🤖</span>
+                <span class="tab-text">Watch Learn vs Baseline</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-selfplay">
+                <span class="tab-icon">🔄</span>
+                <span class="tab-text">Watch Self-Play</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-saved">
+                <span class="tab-icon">⚔️</span>
+                <span class="tab-text">Play vs Saved Model</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-live">
+                <span class="tab-icon">🧠</span>
+                <span class="tab-text">Play & Teach Model Live</span>
+            </button>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="tab-content">
+            <!-- MODE 1: WATCH BASELINE LEARNING -->
+            <section id="tab-baseline" class="tab-pane active">
+                <div class="mode-header">
+                    <h2>Watch Model Learn Against Random Player</h2>
+                    <p>The neural network plays games as Player 1 (X) against a random player (O), collecting trajectories and updating its weights in real time using REINFORCE.</p>
+                </div>
+
+                <div class="grid-layout">
+                    <!-- Board Section -->
+                    <div class="card board-card">
+                        <div class="card-header">
+                            <span class="status-indicator live"></span>
+                            <span class="card-title">Live Game Board</span>
+                            <span id="baseline-status" class="status-pill">Ready</span>
+                        </div>
+                        <div class="board-wrapper">
+                            <div class="board" id="board-baseline"></div>
+                        </div>
+                        <div class="controls-bar">
+                            <button id="btn-baseline-auto" class="btn btn-primary">▶ Start Auto-Play</button>
+                            <button id="btn-baseline-step" class="btn btn-secondary">Step Move</button>
+                            <button id="btn-baseline-batch" class="btn btn-secondary">+20 Games Turbo</button>
+                            <button id="btn-baseline-reset" class="btn btn-outline">Reset</button>
+                        </div>
+                        <div class="speed-control">
+                            <label for="speed-baseline">Speed: <span id="speed-label-baseline">Medium</span></label>
+                            <input type="range" id="speed-baseline" min="50" max="800" step="50" value="350">
+                        </div>
+                    </div>
+
+                    <!-- Metrics & Graph -->
+                    <div class="side-column">
+                        <div class="card stats-card">
+                            <div class="card-header">
+                                <span class="card-title">Training Metrics</span>
+                                <button id="btn-baseline-save" class="btn btn-xs btn-outline">💾 Save Model</button>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">Games Played</span>
+                                    <span id="stat-baseline-games" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-win">
+                                    <span class="stat-label">Win Rate</span>
+                                    <span id="stat-baseline-winrate" class="stat-value">0%</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-label">Draws</span>
+                                    <span id="stat-baseline-draws" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-loss">
+                                    <span class="stat-label">Last Loss</span>
+                                    <span id="stat-baseline-loss" class="stat-value">0.0000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <span class="card-title">Win Rate & Loss History</span>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-baseline"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODE 2: WATCH SELF-PLAY LEARNING -->
+            <section id="tab-selfplay" class="tab-pane">
+                <div class="mode-header">
+                    <h2>Watch Model Learn via Self-Play</h2>
+                    <p>The network plays against itself. Both Player 1 (X) and Player 2 (O) are powered by the neural net, learning offensive tactics and airtight defensive counters simultaneously.</p>
+                </div>
+
+                <div class="grid-layout">
+                    <!-- Board Section -->
+                    <div class="card board-card">
+                        <div class="card-header">
+                            <span class="status-indicator live"></span>
+                            <span class="card-title">Self-Play Board</span>
+                            <span id="selfplay-status" class="status-pill">Ready</span>
+                        </div>
+                        <div class="board-wrapper">
+                            <div class="board" id="board-selfplay"></div>
+                        </div>
+                        <div class="controls-bar">
+                            <button id="btn-selfplay-auto" class="btn btn-primary">▶ Start Self-Play</button>
+                            <button id="btn-selfplay-step" class="btn btn-secondary">Step Move</button>
+                            <button id="btn-selfplay-batch" class="btn btn-secondary">+20 Games Turbo</button>
+                            <button id="btn-selfplay-reset" class="btn btn-outline">Reset</button>
+                        </div>
+                        <div class="speed-control">
+                            <label for="speed-selfplay">Speed: <span id="speed-label-selfplay">Medium</span></label>
+                            <input type="range" id="speed-selfplay" min="50" max="800" step="50" value="350">
+                        </div>
+                    </div>
+
+                    <!-- Metrics & Graph -->
+                    <div class="side-column">
+                        <div class="card stats-card">
+                            <div class="card-header">
+                                <span class="card-title">Self-Play Stats</span>
+                                <button id="btn-selfplay-save" class="btn btn-xs btn-outline">💾 Save Model</button>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">Games Played</span>
+                                    <span id="stat-selfplay-games" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-draw">
+                                    <span class="stat-label">Draw Rate</span>
+                                    <span id="stat-selfplay-drawrate" class="stat-value">0%</span>
+                                </div>
+                                <div class="stat-box accent-x">
+                                    <span class="stat-label">X Win Rate</span>
+                                    <span id="stat-selfplay-xwin" class="stat-value">0%</span>
+                                </div>
+                                <div class="stat-box accent-o">
+                                    <span class="stat-label">O Win Rate</span>
+                                    <span id="stat-selfplay-owin" class="stat-value">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <span class="card-title">Self-Play Evolution (Defense & Balance)</span>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-selfplay"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODE 3: PLAY VS SAVED MODEL -->
+            <section id="tab-saved" class="tab-pane">
+                <div class="mode-header">
+                    <h2>Play Against the Trained Model</h2>
+                    <p>Challenge the neural network loaded from <code>model.npz</code>. See the model's live probability distribution on each square as you play.</p>
+                </div>
+
+                <div class="play-layout">
+                    <div class="card board-card play-card">
+                        <div class="game-top-bar">
+                            <div class="symbol-selector">
+                                <span>Play as:</span>
+                                <button class="btn btn-sm btn-symbol active" id="btn-saved-symbol-x">X (Go First)</button>
+                                <button class="btn btn-sm btn-symbol" id="btn-saved-symbol-o">O (Go Second)</button>
+                            </div>
+                            <button id="btn-saved-restart" class="btn btn-sm btn-primary">🔄 New Game</button>
+                        </div>
+
+                        <div id="saved-game-status" class="game-banner">Your turn! Click an empty square.</div>
+
+                        <div class="board-wrapper">
+                            <div class="board clickable-board" id="board-saved"></div>
+                        </div>
+                    </div>
+
+                    <div class="side-column">
+                        <div class="card stats-card">
+                            <div class="card-header">
+                                <span class="card-title">Match Scoreboard</span>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-box accent-win">
+                                    <span class="stat-label">Your Wins</span>
+                                    <span id="score-saved-user" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-loss">
+                                    <span class="stat-label">AI Wins</span>
+                                    <span id="score-saved-ai" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-draw">
+                                    <span class="stat-label">Draws</span>
+                                    <span id="score-saved-draw" class="stat-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card info-card">
+                            <div class="card-header">
+                                <span class="card-title">💡 How AI Evaluates Moves</span>
+                            </div>
+                            <div class="info-content">
+                                <p>The percentages displayed in empty cells represent the neural network's policy probabilities ($\pi(a|s)$) computed via softmax logits.</p>
+                                <p>The higher the percentage, the higher the AI's confidence in that square!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODE 4: PLAY & TEACH MODEL LIVE -->
+            <section id="tab-live" class="tab-pane">
+                <div class="mode-header">
+                    <h2>Play Against Model as it Learns From You</h2>
+                    <p>Interactive reinforcement learning. Every time you finish a game against the model, it immediately backpropagates the result and updates its neural weights to adapt to your play style!</p>
+                </div>
+
+                <div class="play-layout">
+                    <div class="card board-card play-card">
+                        <div class="game-top-bar">
+                            <div class="symbol-selector">
+                                <span>Play as:</span>
+                                <button class="btn btn-sm btn-symbol active" id="btn-live-symbol-x">X (Go First)</button>
+                                <button class="btn btn-sm btn-symbol" id="btn-live-symbol-o">O (Go Second)</button>
+                            </div>
+                            <div class="live-action-buttons">
+                                <button id="btn-live-restart" class="btn btn-sm btn-primary">🔄 New Game</button>
+                                <button id="btn-live-reset-scratch" class="btn btn-sm btn-outline">Fresh Brain</button>
+                                <button id="btn-live-reset-ckpt" class="btn btn-sm btn-outline">Load Saved Model</button>
+                            </div>
+                        </div>
+
+                        <div id="live-game-status" class="game-banner">Your turn! Click an empty square.</div>
+
+                        <div class="board-wrapper">
+                            <div class="board clickable-board" id="board-live"></div>
+                        </div>
+                    </div>
+
+                    <div class="side-column">
+                        <div class="card stats-card">
+                            <div class="card-header">
+                                <span class="card-title">Live Learning Match Record</span>
+                                <button id="btn-live-save" class="btn btn-xs btn-outline">💾 Save This Brain</button>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">Games Played</span>
+                                    <span id="score-live-games" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-win">
+                                    <span class="stat-label">Your Wins</span>
+                                    <span id="score-live-user" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-loss">
+                                    <span class="stat-label">AI Wins</span>
+                                    <span id="score-live-ai" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-box accent-draw">
+                                    <span class="stat-label">Draws</span>
+                                    <span id="score-live-draw" class="stat-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card brain-update-card">
+                            <div class="card-header">
+                                <span class="card-title">🧠 Real-Time Brain Update</span>
+                                <span id="brain-status-pill" class="status-pill status-ready">Waiting for game end</span>
+                            </div>
+                            <div id="brain-update-details" class="brain-details">
+                                <p class="placeholder-text">Play a game against the model. When the match finishes, watch its policy update here in real time!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

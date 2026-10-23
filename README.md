@@ -1,6 +1,6 @@
 # Reinforce-tic-tac-toe
 
-A neural network trained via Policy Gradient (REINFORCE) to play Tic-Tac-Toe.
+A neural network trained via Policy Gradient (REINFORCE) to play Tic-Tac-Toe, featuring an interactive Flask Web Dashboard with live visual training, self-play, and human-in-the-loop online learning.
 
 ## Overview
 
@@ -9,26 +9,58 @@ A neural network trained via Policy Gradient (REINFORCE) to play Tic-Tac-Toe.
 - **Environment**: Custom 3x3 Tic-Tac-Toe board logic with move validation and win condition detection.
 - **Performance**: Consistently achieves **>90% win rate** against random opponent baseline.
 
-## Project Structure
+---
 
-- `game.py`: Tic-Tac-Toe game engine, rules, state representation, win detection, and CLI board display.
-- `nn.py`: Pure NumPy `Network` implementation with Adam optimizer, forward/backward passes, REINFORCE gradient updates, and model save/load (`model.npz`).
-- `train.py`: Batch training loop using REINFORCE policy gradients, discounted rewards, advantage normalization, and model checkpointing.
-- `play.py`: Interactive CLI to play against the trained neural network as Player 1 (X) or Player 2 (O).
-- `t.py`: Masking utility script for verifying occupied cell handling.
+## 🌟 Interactive Flask Web Dashboard
 
-## Quick Start
+Launch the web app:
 
-### 1. Train the Neural Network
+```bash
+python app.py
+```
+Open your browser at **`http://localhost:5000`**.
 
+### The 4 Interactive Modes:
+
+1. 🤖 **Watch Model Learn (vs Baseline)**
+   - Watch the neural net learn against a random player move-by-move.
+   - Live probability heatmaps on empty squares show where the model wants to play.
+   - Interactive charts plot Win Rate and Loss over time.
+   - Control playback speed, pause, or run +20 turbo games.
+
+2. 🔄 **Watch Self-Play Training**
+   - The model plays as both Player 1 (X) and Player 2 (O).
+   - Watch both sides discover offensive tactics and defensive counters.
+   - Chart tracks Draw Rate (defense quality), X-Wins, and O-Wins.
+
+3. ⚔️ **Play vs Saved Model**
+   - Challenge the saved model (`model.npz`).
+   - Play as Player 1 (X, goes first) or Player 2 (O, goes second).
+   - View the AI's move probabilities on each cell as you decide your moves.
+
+4. 🧠 **Play & Teach Model Live (Online Learning)**
+   - Play against an active neural net that learns from YOU!
+   - Every game you complete triggers an immediate policy gradient update.
+   - Real-time "Brain Update" card displays assigned reward, backprop loss, and behavioral adaptation.
+   - Start from scratch or fine-tune the saved model.
+
+---
+
+## Command Line Scripts
+
+### Train in Terminal
 ```bash
 python train.py
 ```
-This runs batches of games, logs win/draw/loss rates, and automatically saves weights to `model.npz` once the target win rate (≥ 90%) is achieved.
+Trains until target win rate (≥ 90%) is reached and saves weights to `model.npz`.
 
-### 2. Play Against the AI
-
+### Play in Terminal
 ```bash
 python play.py
 ```
-Choose whether to go first (Player 1 / X) or second (Player 2 / O), and enter coordinates `row col` (e.g. `1 1`).
+Interactive CLI match against the saved model.
+
+### Run Unit Tests
+```bash
+python -m unittest test_game_and_nn.py test_app.py
+```
